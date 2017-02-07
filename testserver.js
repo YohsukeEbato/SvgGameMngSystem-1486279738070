@@ -1,26 +1,48 @@
 /*eslint-env node, express*/
 
+
 // This application uses express as its web server
 // for more info, see: http://expressjs.com
-var express = require('express');
+const express = require('express');
 
 // cfenv provides access to your Cloud Foundry environment
 // for more info, see: https://www.npmjs.com/package/cfenv
-var cfenv = require('cfenv');
+const cfenv = require('cfenv');
 
 // create a new express server
-var app = express();
+const app = express();
+const http = require('http').Server(app);
+const server = http.createServer(app);
+const io = require('socket.io').listen(server);
+//const io = require('socket.io')(http);
 
 // serve the files out of ./public as our main files
 app.use(express.static(__dirname + '/public'));
 
 // get the app environment from Cloud Foundry
-var appEnv = cfenv.getAppEnv();
+const appEnv = cfenv.getAppEnv();
+const PORT = appEnv.port;
+
+// TODO:呼び出されていない？？
+app.get(`/`, (req, res) => {
+	console.log("★app.get");
+	res.sendFile(__dirname + '/public/red.html');
+});
+
 
 // start server on the specified port and binding host
-app.listen(appEnv.port, '0.0.0.0', function() {
-  // print a message when the server starts listening
-  console.log("server starting on " + appEnv.url);
+app.listen(PORT, '0.0.0.0', function() {
+	// print a message when the server starts listening
+	console.log("★server starting on " + appEnv.url);
+});
+
+io.on('connection', (socket) => {
+	console.log('★a user connected');
+
+	socket.on('chat message', (msg) => {
+		console.log('★message: ' + msg);
+		io.emit('chat message', msg);
+	});
 });
 
 
