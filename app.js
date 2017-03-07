@@ -21,8 +21,18 @@ app.use(express.static(__dirname + '/public'));
 // get the app environment from Cloud Foundry
 var appEnv = cfenv.getAppEnv();
 
+var http = require('http').Server(app);
+var io = require('socket.io')(http);
+http.listen(process.env.PORT || 3000);
+
+io.on('connection', function(socket) {
+});
+
+
 // start server on the specified port and binding host
+/*
 app.listen(appEnv.port, '0.0.0.0', function() {
   // print a message when the server starts listening
   console.log("server starting on " + appEnv.url);
 });
+*/
